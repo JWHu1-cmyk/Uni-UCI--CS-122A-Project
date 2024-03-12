@@ -8,9 +8,8 @@ def connect_to_database():
     try:
         # Connect to the MySQL server
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="zippy",
+            user="test",
+            password="password",
             database = "cs122a"
          
         )
@@ -251,10 +250,8 @@ def import_data(folderName:str, connection):
     try:
         drop_table(connection)
     
-        print("did try")
     except:
-        print("NO Tables to drop")
-
+        pass
     #read folder files, add tables and return(Table - (Number of users,Number of machine, Number of Course))
     file_name = "admins.csv"
     file_path = os.path.join(folderName, file_name)
@@ -344,7 +341,6 @@ if __name__ == "__main__":
 
     connection = connect_to_database()
 
-    print(args)
     if args[1] == "import":
         import_data(folderName=args[2],connection=connection)
         print(str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)))
@@ -354,31 +350,31 @@ if __name__ == "__main__":
             add_user(args[2],args[4],args[5],args[6],connection)
             add_student(args[2],connection)
             add_email(args[2],args[3],connection)
-            print( True)
+            print( "Success")
         except:
-            print(False)     
+            print("Fail")     
     elif args[1] == "addEmail":
         try:        
             add_email(args[2],args[3],connection)
-            print(True)
+            print("Success")
         except:
-            print(False)
+            print("Fail")
     elif args[1] ==  "deleteStudent":
         try:
             deleteUser(args[2],connection)
             deleteStudent(args[2],connection)
-            print(True)
+            print("Success")
         except:
-            print(False)
+            print("Fail")
     elif args[1] =="insertMachine":
         try:
             add_machine(args[2],args[3],args[4],args[5],args[6],connection)
-            print(True)
+            print("Success")
         except:
-            print(False)
+            print("Fail")
     elif args[1] == "insertUse":
         try:
             add_use(args[2],args[3],args[4],args[5],args[6],connection)
-            print(True)
+            print("Success")
         except:
-            print(False)
+            print("Fail")
