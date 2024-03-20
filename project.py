@@ -12,6 +12,14 @@ def connect_to_database():
         connection = mysql.connector.connect(user='test', password='password', database="cs122a")
 
 
+        # connection = mysql.connector.connect(
+        #     host="localhost",
+        #     user="root",
+        #     password="zippy",
+        #     database ="cs122a",
+         
+        # )
+
         
         return connection
     except mysql.connector.Error as err:
@@ -159,7 +167,7 @@ def update_Course(cid, title, connection):
 
 
 def courses_attended(uid, connection):
-    query = "SELECT C.CourseID, C.Title, C.Quarter FROM Students S, StudentUseMachinesInProject U, Projects P, Courses C WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID AND S.UCINetID = '{}' ORDER BY C.CourseID ASC".format(uid)
+    query = "SELECT DISTINCT C.CourseID, C.Title, C.Quarter FROM Students S, StudentUseMachinesInProject U, Projects P, Courses C WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID AND S.UCINetID = '{}' ORDER BY C.CourseID ASC".format(uid)
 
     cursor = connection.cursor()
 
@@ -206,7 +214,7 @@ def emails_of_admin(machineID,connection):
 
 def max_course(num, connection):
     query = """
-    SELECT C.CourseID, C.Title, Count(S.UCINetID)
+    SELECT C.CourseID, C.Title, Count(DISTINCT S.UCINetID)
     FROM Students S, Courses C, StudentUseMachinesInProject U, Projects P
     WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID
     GROUP BY C.CourseID
@@ -222,7 +230,7 @@ def max_course(num, connection):
     rows = cursor.fetchall()
 
     for row in rows:
-        print(row[0],", ", row[1],", ", row[2], sep="")
+        print(row[0],",", row[1],",", row[2], sep="")
 
     cursor.close()
 
