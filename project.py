@@ -144,12 +144,19 @@ def deleteUser(UCINetID,connection):
     connection.commit()
     cursor.close()
 
-#will print success even if courseID does not exist
 def update_Course(cid, title, connection):
 
-    query = "UPDATE Courses SET Title = '{}' WHERE CourseID = '{}'".format(title, cid)
-
     cursor = connection.cursor()
+    
+    # Check if the CourseID exists
+    cursor.execute("SELECT 1 FROM Courses WHERE CourseID = %s", (cid,))
+    exists = cursor.fetchone()
+    
+    if not exists:
+        cursor.close()
+        raise ValueError()
+
+    query = "UPDATE Courses SET Title = '{}' WHERE CourseID = '{}'".format(title, cid)
 
     cursor.execute(query)
 
