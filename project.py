@@ -146,8 +146,9 @@ def deleteUser(UCINetID,connection):
 
 #will print success even if courseID does not exist
 def update_Course(cid, title, connection):
+
     query = "UPDATE Courses SET Title = '{}' WHERE CourseID = '{}'".format(title, cid)
-    #print(query)
+
     cursor = connection.cursor()
 
     cursor.execute(query)
@@ -156,9 +157,9 @@ def update_Course(cid, title, connection):
     connection.commit()
     cursor.close()
 
+
 def courses_attended(uid, connection):
     query = "SELECT C.CourseID, C.Title, C.Quarter FROM Students S, StudentUseMachinesInProject U, Projects P, Courses C WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID AND S.UCINetID = '{}' ORDER BY C.CourseID ASC".format(uid)
-    #print(query)
 
     cursor = connection.cursor()
 
@@ -172,8 +173,67 @@ def courses_attended(uid, connection):
     cursor.close()
 
 def max_course(num, connection):
-    query = ""
+    query = """
+    SELECT C.CourseID, C.Title, Count(S.UCINetID)
+    FROM Students S, Courses C, StudentUseMachinesInProject U, Projects P
+    WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID
+    GROUP BY C.CourseID
+    ORDER BY Count(S.UCINETID) DESC
+    LIMIT {}
+    """.format(num)
+
+    #print(query)
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row[0],", ", row[1],", ", row[2], sep="")
+
+    cursor.close()
+
+
+def active_Student(mid, N, startDate, endDate, connection):
+    query = """
+    SELECT U.UCINetID, U.Firstname, U.Middlename, U.Lastname
+    FROM Users U, Students S, StudentUseMachinesInProject P
+    WHERE U.UCINetID = S.UCINetID AND S.UCINetID = P.StudentUCINetID AND P.MachineID = '{}' 
+    AND P.StartDate >= '{}' AND P.EndDate <= '{}'
+    GROUP BY U.UCINetID
+    HAVING COUNT(*) >= {}
+    ORDER BY U.UCINetID ASC
+    """.format(mid, startDate, endDate, N)
+
     print(query)
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row[0],", ", row[1],", ", row[2], ", ", row[3], sep="")
+
+    cursor.close()
+
+#needs to include machines that are not used in the course, which should have a count of 0 instead of not appearing
+def machine_Usage(cid, connection):
+    query = """
+    SELECT M.MachineID, M.Hostname, M.IPAddress, COUNT(*)
+    FROM Machines M, StudentUseMachinesInProject U, Projects P
+    WHERE M.MachineID = U.MachineID AND U.ProjectID = P.ProjectID AND P.CourseID = {}
+    GROUP BY M.MachineID
+    ORDER BY M.MachineID DESC
+    """.format(cid)
+    cursor = connection.cursor()
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row[0],", ", row[1],", ", row[2], ", ", row[3], sep="")
 
 
 def drop_table(connection):
@@ -414,8 +474,18 @@ if __name__ == "__main__":
             print("Success")
         except:
             print("Fail")
+
     elif args[1] == "listCourse":
         courses_attended(args[2], connection)
             
     elif args[1] == "popularCourse":
         max_course(args[2], connection)
+    
+    #missing function 10
+
+
+    elif args[1] == "activeStudent":
+        active_Student(args[2], args[3], args[4], args[5], connection)
+
+    elif args[1] == "machineUsage":
+        machine_Usage(args[2], connection)
