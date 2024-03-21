@@ -476,7 +476,7 @@ if __name__ == "__main__":
     
     if args[1] == "import":
         import_data(folderName=args[2],connection=connection)
-        print("Table - (" + str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)) + ")")
+        print(str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)))
 
     elif args[1]  == "insertStudent":
         try:
@@ -486,6 +486,7 @@ if __name__ == "__main__":
             print( "Success")
         except:
             print("Fail")     
+            
     elif args[1] == "addEmail":
         try:        
             add_email(args[2],args[3],connection)
