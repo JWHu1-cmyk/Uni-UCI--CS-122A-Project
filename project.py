@@ -7,9 +7,10 @@ import os
 def connect_to_database():
     try:
         # Connect to the MySQL server
-        #connect to gradescope autograder down below
+        # connect to gradescope autograder down below
 
-        connection = mysql.connector.connect(user='root', password='password', database="cs122a")
+        connection = mysql.connector.connect(user='test', password='password', database="cs122a")
+
 
         # connection = mysql.connector.connect(
         #     host="localhost",
@@ -281,7 +282,7 @@ def machine_Usage(cid, connection):
 
 
 def drop_table(connection):
-
+# input standard sql commands into connection.cursor().execute()
     create_table_query = "DROP TABLE administratormanagemachines"     
     connect = connection.cursor()
     connect.execute(create_table_query) 
@@ -316,7 +317,6 @@ def drop_table(connection):
     connect = connection.cursor()
     connect.execute(create_table_query) 
     connection.commit()
-
 
     create_table_query = "DROP TABLE machines"     
     connect = connection.cursor()
@@ -379,6 +379,9 @@ def create_tables(connection):
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
+
+
+
 
 def import_data(folderName:str, connection):
     try:
@@ -449,9 +452,6 @@ def import_data(folderName:str, connection):
             # Process each row
             add_machine(row[0],row[1],row[2],row[3],row[4],connection)
 
-
-
-
     with open(f"{folderName}/use.csv","r") as f:
         csv_reader = csv.reader(f)
         
@@ -469,12 +469,19 @@ def import_data(folderName:str, connection):
             # Process each row
             add_mange(row[0],row[1],connection)
 
+
+
+
+
+
 if __name__ == "__main__":
 
     args = sys.argv
 
     connection = connect_to_database()
-
+    # credential saved in def connect_to_database();
+    # def connect_to_database() returns mysql.connector.connect() as object 'connection';
+    
     if args[1] == "import":
         import_data(folderName=args[2],connection=connection)
         print(str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)))
@@ -487,6 +494,7 @@ if __name__ == "__main__":
             print( "Success")
         except:
             print("Fail")     
+            
     elif args[1] == "addEmail":
         try:        
             add_email(args[2],args[3],connection)
