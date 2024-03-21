@@ -128,6 +128,19 @@ def get_table_size(table_name,connection):
 
     return size
 
+def get_table_contents(table_name, connection):
+    cursor = connection.cursor()
+ 
+    query = "SELECT * FROM {}".format(table_name)
+    
+    cursor.execute(query)
+    
+    rows = cursor.fetchall()
+    
+    cursor.close()
+    
+    return rows
+
 def deleteStudent(UCINetID,connection):
     delete = "DELETE FROM Students WHERE UCINetID = '{}'".format(UCINetID)
     cursor = connection.cursor()
@@ -279,7 +292,7 @@ def machine_Usage(cid, connection):
 
 
 def drop_table(connection):
-# input standard sql commands into connection.cursor().execute()
+# input standard sql DROP TABLE commands into connection.cursor().execute()
     create_table_query = "DROP TABLE administratormanagemachines"     
     connect = connection.cursor()
     connect.execute(create_table_query) 
@@ -328,17 +341,17 @@ def drop_table(connection):
     connect.close()
  
 def create_tables(connection):
-    create_table_query = "CREATE TABLE Users (UCINetID VARCHAR(255) PRIMARY KEY, Firstname VARCHAR(255), Middlename VARCHAR(255), Lastname VARCHAR(255)  );"     
+    create_table_query = "CREATE TABLE Users( UCINetID VARCHAR(255) PRIMARY KEY, Firstname VARCHAR(255), Middlename VARCHAR(255), Lastname VARCHAR(255) );"     
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE UserEmail (UCINetID VARCHAR(255) NOT NULL, Email VARCHAR(255),  PRIMARY KEY (UCINetID, Email), FOREIGN KEY (UCINetID) REFERENCES Users (UCINetID) ON DELETE CASCADE );"
+    create_table_query = "CREATE TABLE UserEmail( UCINetID VARCHAR(255) NOT NULL, Email VARCHAR(255), PRIMARY KEY (UCINetID, Email), FOREIGN KEY (UCINetID) REFERENCES Users (UCINetID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE Students (UCINetID VARCHAR(20) PRIMARY KEY NOT NULL,FOREIGN KEY (UCINetID) REFERENCES Users(UCINetID) ON DELETE CASCADE);"
+    create_table_query = "CREATE TABLE Students( UCINetID VARCHAR(20) PRIMARY KEY NOT NULL, FOREIGN KEY (UCINetID) REFERENCES Users(UCINetID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
@@ -348,31 +361,29 @@ def create_tables(connection):
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE Courses (CourseID INT PRIMARY KEY NOT NULL,Title VARCHAR(100),Quarter VARCHAR(20));"
+    create_table_query = "CREATE TABLE Courses( CourseID INT PRIMARY KEY NOT NULL, Title VARCHAR(100), Quarter VARCHAR(20) );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
     
-    create_table_query = "CREATE TABLE Projects (ProjectID INT PRIMARY KEY NOT NULL,Name VARCHAR(100),Description TEXT,CourseID INT NOT NULL,FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE);"
+    create_table_query = "CREATE TABLE Projects( ProjectID INT PRIMARY KEY NOT NULL, Name VARCHAR(100), Description TEXT, CourseID INT NOT NULL, FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
 
-    create_table_query = "CREATE TABLE Machines (MachineID INT PRIMARY KEY NOT NULL, Hostname VARCHAR(255), IPAddress VARCHAR(15),OperationalStatus VARCHAR(50),Location VARCHAR(255));"
+    create_table_query = "CREATE TABLE Machines( MachineID INT PRIMARY KEY NOT NULL, Hostname VARCHAR(255), IPAddress VARCHAR(15), OperationalStatus VARCHAR(50), Location VARCHAR(255) );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
     #add managae and use rel tables
 
-    create_table_query =" CREATE TABLE StudentUseMachinesInProject (ProjectID INT,StudentUCINetID VARCHAR(20),MachineID INT,StartDate DATE,EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID),FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID),FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE);"
-
-    
+    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE AdministratorManageMachines (AdministratorUCINetID VARCHAR(20),MachineID INT,PRIMARY KEY (AdministratorUCINetID, MachineID),FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID),FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE);"
+    create_table_query = "CREATE TABLE AdministratorManageMachines( AdministratorUCINetID VARCHAR(20), MachineID INT, PRIMARY KEY (AdministratorUCINetID, MachineID), FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
@@ -386,12 +397,14 @@ def import_data(folderName:str, connection):
     
     except:
         pass
-    #read folder files, add tables and return(Table - (Number of users,Number of machine, Number of Course))
+    # read folder files, add tables and return(Table - (Number of users,Number of machine, Number of Course))
     file_name = "admins.csv"
     file_path = os.path.join(folderName, file_name)
+    # Hu: is this necessary?
 
     create_tables(connection)
 
+    # *** begin adding to tables ***
     with open(f"{folderName}/users.csv","r") as f:
         csv_reader = csv.reader(f)
         
@@ -399,6 +412,7 @@ def import_data(folderName:str, connection):
         for row in csv_reader:
             # Process each row
             add_user(row[0],row[1],row[2],row[3],connection)
+            # 'INSERT INTO' returns error if attempting to insert entries with same primary key.
             
     with open(f"{folderName}/emails.csv","r") as f:
         csv_reader = csv.reader(f)
@@ -486,13 +500,20 @@ if __name__ == "__main__":
     if args[1] == "import":
         import_data(folderName=args[2],connection=connection)
         print(str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)))
+    
+    elif args[1] == "getTableContent":
+        rows = get_table_contents(args[2], connection)
+        for row in rows:
+            print(row)
+            print()  # This adds a newline after printing each row
+    # Hu: created for visualization
 
     elif args[1]  == "insertStudent":
         try:
             add_user(args[2],args[4],args[5],args[6],connection)
             add_student(args[2],connection)
             add_email(args[2],args[3],connection)
-            print( "Success")
+            print("Success")
         except:
             print("Fail")     
             
@@ -543,3 +564,5 @@ if __name__ == "__main__":
 
     elif args[1] == "machineUsage":
         machine_Usage(args[2], connection)
+        
+ 

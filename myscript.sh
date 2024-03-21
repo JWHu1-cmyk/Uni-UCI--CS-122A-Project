@@ -10,3 +10,11 @@
 
 python3 project.py import test_data
 python3 project.py insertStudent testID test@uci.edu Alice NULL Wong
+python3 project.py addEmail testID test@gmail.com
+ 
+
+
+
+# python3 project.py getTableContent Students
+# python3 project.py getTableContent Users
+# always suceeding is it normal
