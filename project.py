@@ -97,7 +97,7 @@ def add_machine(MachineID ,Hostname, IPAddress ,OperationalStatus,Location,conne
     cursor.close()
 
 def add_use(ProjectID,StudentUCINetID,MachineID,StartDate,EndDate,connection):
-    use_query = "INSERT INTO StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate ) VALUES  (%s, %s, %s, %s, %s)"
+    use_query = "INSERT INTO StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate) VALUES (%s, %s, %s, %s, %s)"
     cursor = connection.cursor()
 
     cursor.execute(use_query, (ProjectID, StudentUCINetID, MachineID, StartDate, EndDate))
@@ -136,7 +136,7 @@ def get_table_contents(table_name, connection):
     cursor.execute(query)
     
     rows = cursor.fetchall()
-    
+    # it seems liken when fetchall(), csv entries atre grouped when imported;
     cursor.close()
     
     return rows
@@ -356,7 +356,7 @@ def create_tables(connection):
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE Administrators (UCINetID VARCHAR(20) PRIMARY KEY NOT NULL,FOREIGN KEY (UCINetID) REFERENCES Users(UCINetID)ON DELETE CASCADE);"
+    create_table_query = "CREATE TABLE Administrators( UCINetID VARCHAR(20) PRIMARY KEY NOT NULL, FOREIGN KEY (UCINetID) REFERENCES Users(UCINetID) ON DELETE CASCADE );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
@@ -378,12 +378,12 @@ def create_tables(connection):
     connection.commit()
     #add managae and use rel tables
 
-    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE );"
+    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE AdministratorManageMachines( AdministratorUCINetID VARCHAR(20), MachineID INT, PRIMARY KEY (AdministratorUCINetID, MachineID), FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE CASCADE );"
+    create_table_query = "CREATE TABLE AdministratorManageMachines( AdministratorUCINetID VARCHAR(20), MachineID INT, PRIMARY KEY (AdministratorUCINetID, MachineID), FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
@@ -394,10 +394,10 @@ def create_tables(connection):
 def import_data(folderName:str, connection):
     try:
         drop_table(connection)
-    
     except:
         pass
-    # read folder files, add tables and return(Table - (Number of users,Number of machine, Number of Course))
+    
+    # read folder files, add tables and return (Table - (Number of users,Number of machine, Number of Course))
     file_name = "admins.csv"
     file_path = os.path.join(folderName, file_name)
     # Hu: is this necessary?
@@ -523,25 +523,44 @@ if __name__ == "__main__":
             print("Success")
         except:
             print("Fail")
+            
     elif args[1] ==  "deleteStudent":
         try:
             deleteUser(args[2],connection)
             deleteStudent(args[2],connection)
             print("Success")
-        except:
-            print("Fail")
+        # except:
+        #     print("Fail")
+        except Exception as e:
+            print(f"Fail: {str(e)}")
+    
+    elif args[1] ==  "deleteStudent_in_batch":
+        rows = get_table_contents(args[2], connection)
+        for row in rows:
+            try:
+                deleteUser(row[0],connection)
+                deleteStudent(row[0],connection)
+                print("delete " + row[0] + " Success\n")
+            except Exception as e:
+                print("delete " + row[0] + " Fail")
+                print(f"Fail: {str(e)}\n")
+            
     elif args[1] =="insertMachine":
         try:
             add_machine(args[2],args[3],args[4],args[5],args[6],connection)
             print("Success")
         except:
             print("Fail")
+            
     elif args[1] == "insertUse":
         try:
             add_use(args[2],args[3],args[4],args[5],args[6],connection)
             print("Success")
-        except:
-            print("Fail")
+        # except:
+        #     print("Fail")
+        except Exception as e:
+            print(f"Fail: {str(e)}")
+                
     elif args[1] == "updateCourse":
         try:
             update_Course(args[2], args[3], connection)
@@ -549,8 +568,28 @@ if __name__ == "__main__":
         except:
             print("Fail")
 
+    elif args[1] ==  "updateCourse_in_batch":
+        rows = get_table_contents(args[2], connection)
+        for row in rows:
+            try:
+                update_Course(row[0], args[3], connection)
+                print("update " + str(row[0]) + " Success")
+            except Exception as e:
+                print("update " + str(row[0]) + " Fail")
+                print(f"Fail: {str(e)}")
+
     elif args[1] == "listCourse":
         courses_attended(args[2], connection)
+
+    elif args[1] ==  "listCourse_in_batch":
+        rows = get_table_contents(args[2], connection)
+        for row in rows:
+            try:
+                print("\nlistCourse_in_batch " + row[1] + " Success")
+                courses_attended(row[1], connection)
+            except Exception as e:
+                print("listCourse " + row[1] + " Fail")
+                print(f"Fail: {str(e)}")
             
     elif args[1] == "popularCourse":
         max_course(args[2], connection)
