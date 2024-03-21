@@ -7,15 +7,21 @@ import os
 def connect_to_database():
     try:
         # Connect to the MySQL server
-        connection = mysql.connector.connect(
-            user="root",
-            password="password",
-            database = "cs122a"
+        #connect to gradescope autograder down below
+
+        connection = mysql.connector.connect(user='root', password='password', database="cs122a")
+
+        # connection = mysql.connector.connect(
+        #     host="localhost",
+        #     user="root",
+        #     password="zippy",
+        #     database ="cs122a",
          
-        )
+        # )
         return connection
     except mysql.connector.Error as err:
         print("Error connecting to MySQL:", err)
+
 
 def add_user(UCINetID, First, Middle, Last,connection):
     user_query = "INSERT INTO Users (UCINetID, Firstname, Middlename, Lastname)VALUES ('{}', '{}', '{}', '{}');".format(UCINetID, First, Middle, Last)
@@ -166,7 +172,7 @@ def update_Course(cid, title, connection):
 
 
 def courses_attended(uid, connection):
-    query = "SELECT C.CourseID, C.Title, C.Quarter FROM Students S, StudentUseMachinesInProject U, Projects P, Courses C WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID AND S.UCINetID = '{}' ORDER BY C.CourseID ASC".format(uid)
+    query = "SELECT DISTINCT C.CourseID, C.Title, C.Quarter FROM Students S, StudentUseMachinesInProject U, Projects P, Courses C WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID AND S.UCINetID = '{}' ORDER BY C.CourseID ASC".format(uid)
 
     cursor = connection.cursor()
 
@@ -175,13 +181,42 @@ def courses_attended(uid, connection):
     rows = cursor.fetchall()
 
     for row in rows:
-        print(row[0],", ", row[1],", ", row[2], sep="")
+        print(row[0],",", row[1],",", row[2], sep="")
 
     cursor.close()
 
+
+def emails_of_admin(machineID,connection):
+        
+    query = """
+        SELECT A.UCINetID, U.Firstname, U.Middlename, U.Lastname, GROUP_CONCAT(UE.Email, ';') AS EmailList
+        FROM Administrators A
+        INNER JOIN Users U ON A.UCINetID = U.UCINetID
+        INNER JOIN UserEmail UE ON A.UCINetID = UE.UCINetID
+        INNER JOIN AdministratorManageMachines AMM ON A.UCINetID = AMM.AdministratorUCINetID
+        WHERE AMM.MachineID = {}
+        GROUP BY A.UCINetID, U.Firstname, U.Middlename, U.Lastname
+        ORDER BY A.UCINetID ASC;
+    """.format(machineID)
+
+    cursor = connection.cursor()
+
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+
+    for row in rows:
+        email_list = row[4].replace(';,', ';')
+        if email_list.endswith(';'):
+            email_list = email_list[:-1]  # Remove the last semicolon
+        print(','.join(str(cell) for cell in row[:4]) + ',' + email_list)
+
+
+
 def max_course(num, connection):
     query = """
-    SELECT C.CourseID, C.Title, Count(S.UCINetID)
+    SELECT C.CourseID, C.Title, Count(DISTINCT S.UCINetID)
     FROM Students S, Courses C, StudentUseMachinesInProject U, Projects P
     WHERE C.CourseID = P.CourseID AND P.ProjectID = U.ProjectID AND U.StudentUCINetID = S.UCINetID
     GROUP BY C.CourseID
@@ -197,7 +232,7 @@ def max_course(num, connection):
     rows = cursor.fetchall()
 
     for row in rows:
-        print(row[0],", ", row[1],", ", row[2], sep="")
+        print(row[0],",", row[1],",", row[2], sep="")
 
     cursor.close()
 
@@ -213,7 +248,6 @@ def active_Student(mid, N, startDate, endDate, connection):
     ORDER BY U.UCINetID ASC
     """.format(mid, startDate, endDate, N)
 
-    print(query)
 
     cursor = connection.cursor()
     cursor.execute(query)
@@ -221,26 +255,29 @@ def active_Student(mid, N, startDate, endDate, connection):
     rows = cursor.fetchall()
 
     for row in rows:
-        print(row[0],", ", row[1],", ", row[2], ", ", row[3], sep="")
+        print(row[0],",", row[1],",", row[2], ",", row[3], sep="")
 
     cursor.close()
 
-#needs to include machines that are not used in the course, which should have a count of 0 instead of not appearing
+
 def machine_Usage(cid, connection):
+
     query = """
-    SELECT M.MachineID, M.Hostname, M.IPAddress, COUNT(*)
-    FROM Machines M, StudentUseMachinesInProject U, Projects P
-    WHERE M.MachineID = U.MachineID AND U.ProjectID = P.ProjectID AND P.CourseID = {}
+    SELECT M.MachineID, M.Hostname, M.IPAddress, COALESCE(COUNT(U.ProjectID), 0) 
+    FROM Machines M
+    LEFT JOIN StudentUseMachinesInProject U ON M.MachineID = U.MachineID
+    AND U.ProjectID IN (SELECT ProjectID FROM Projects WHERE CourseID = {})
     GROUP BY M.MachineID
-    ORDER BY M.MachineID DESC
+    ORDER BY M.MachineID DESC;
     """.format(cid)
+
     cursor = connection.cursor()
     cursor.execute(query)
 
     rows = cursor.fetchall()
 
     for row in rows:
-        print(row[0],", ", row[1],", ", row[2], ", ", row[3], sep="")
+        print(row[0],",", row[1],",", row[2], ",", row[3], sep="")
 
 
 def drop_table(connection):
@@ -488,7 +525,8 @@ if __name__ == "__main__":
     elif args[1] == "popularCourse":
         max_course(args[2], connection)
     
-    #missing function 10
+    elif args[1] == "adminEmails":
+        emails_of_admin(args[2],connection)
 
 
     elif args[1] == "activeStudent":
