@@ -25,53 +25,51 @@ def connect_to_database():
 
 
 def add_user(UCINetID, First, Middle, Last,connection):
-    user_query = "INSERT INTO Users (UCINetID, Firstname, Middlename, Lastname)VALUES ('{}', '{}', '{}', '{}');".format(UCINetID, First, Middle, Last)
-    
+    user_query = "INSERT INTO Users (UCINetID, Firstname, Middlename, Lastname) VALUES (%s, %s, %s, %s);"
     cursor = connection.cursor()
 
-    cursor.execute(user_query)
+    cursor.execute(user_query, (UCINetID, First, Middle, Last))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_email(UCINetID, Email,connection):
-    email_query = "INSERT INTO UserEmail (UCINetID, Email)VALUES ('{}','{}' )".format(UCINetID, Email)
+    email_query = "INSERT INTO UserEmail (UCINetID, Email) VALUES (%s, %s);"
     
     cursor = connection.cursor()
 
-    cursor.execute(email_query)
+    cursor.execute(email_query, (UCINetID, Email))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_student(UCINetID,connection):
-    student_query = "INSERT INTO Students (UCINetID)VALUES ('{}' )".format(UCINetID)
+    student_query = "INSERT INTO Students (UCINetID) VALUES (%s);"
     cursor = connection.cursor()
 
-    cursor.execute(student_query)
+    cursor.execute(student_query, (UCINetID,))
 
     # Committing the changes
     connection.commit()
     cursor.close()
    
 def add_admins(UCINetID, connection):
-    admins_query = "INSERT INTO Administrators (UCINetID)VALUES ('{}' )".format(UCINetID)
+    admins_query = "INSERT INTO Administrators (UCINetID) VALUES (%s);"
     cursor = connection.cursor()
 
-    cursor.execute(admins_query)
+    cursor.execute(admins_query, (UCINetID,))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_course(CourseID,Title,Quarter,connection):
-    course_query = "INSERT INTO Courses (CourseID, Title, Quarter)VALUES ('{}', '{}', '{}')".format(CourseID,Title,Quarter)
-
+    course_query = "INSERT INTO Courses (CourseID, Title, Quarter) VALUES (%s, %s, %s);"
     cursor = connection.cursor()
 
-    cursor.execute(course_query)
+    cursor.execute(course_query, (CourseID, Title, Quarter))
 
     # Committing the changes
     connection.commit()
@@ -79,41 +77,40 @@ def add_course(CourseID,Title,Quarter,connection):
 
 def add_project(ProjectID,Name,Description,CourseID,connection):
     
-    course_query = "INSERT INTO Projects (ProjectID, Name, Description, CourseID) VALUES ('{}', '{}', '{}','{}')".format(ProjectID,Name,Description,CourseID)
-
+    course_query = "INSERT INTO Projects (ProjectID, Name, Description, CourseID) VALUES (%s, %s, %s, %s);"
     cursor = connection.cursor()
 
-    cursor.execute(course_query)
+    cursor.execute(course_query, (ProjectID, Name, Description, CourseID))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_machine(MachineID ,Hostname, IPAddress ,OperationalStatus,Location,connection):
-    machine_query = "INSERT INTO Machines (MachineID, Hostname, IPAddress, OperationalStatus, Location)VALUES ( '{}','{}','{}','{}','{}')".format(MachineID ,Hostname, IPAddress ,OperationalStatus,Location)
+    machine_query = "INSERT INTO Machines (MachineID, Hostname, IPAddress, OperationalStatus, Location) VALUES (%s, %s, %s, %s, %s);"
     cursor = connection.cursor()
 
-    cursor.execute(machine_query)
+    cursor.execute(machine_query, (MachineID, Hostname, IPAddress, OperationalStatus, Location))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_use(ProjectID,StudentUCINetID,MachineID,StartDate,EndDate,connection):
-    use_query = "INSERT INTO StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate ) VALUES  ('{}', '{}', '{}','{}','{}')".format(ProjectID,StudentUCINetID,MachineID,StartDate,EndDate)
+    use_query = "INSERT INTO StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate ) VALUES  (%s, %s, %s, %s, %s)"
     cursor = connection.cursor()
 
-    cursor.execute(use_query)
+    cursor.execute(use_query, (ProjectID, StudentUCINetID, MachineID, StartDate, EndDate))
 
     # Committing the changes
     connection.commit()
     cursor.close()
 
 def add_mange(UCINetID,MachineID,connection):
-    manage_query = "INSERT INTO AdministratorManageMachines (AdministratorUCINetID, MachineID)VALUES ('{}','{}'  )".format(UCINetID,MachineID)
+    manage_query = "INSERT INTO AdministratorManageMachines (AdministratorUCINetID, MachineID) VALUES (%s, %s);"
     cursor = connection.cursor()
 
-    cursor.execute(manage_query)
+    cursor.execute(manage_query, (UCINetID, MachineID))
 
     # Committing the changes
     connection.commit()
@@ -482,6 +479,10 @@ if __name__ == "__main__":
     # credential saved in def connect_to_database();
     # def connect_to_database() returns mysql.connector.connect() as object 'connection';
     
+    for i in range(len(args)):
+        if args[i] == "NULL":
+            args[i] = None
+
     if args[1] == "import":
         import_data(folderName=args[2],connection=connection)
         print(str(get_table_size("Users",connection))+","+str(get_table_size("Machines",connection))+","+str(get_table_size("Courses",connection)))
