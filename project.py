@@ -141,6 +141,19 @@ def get_table_contents(table_name, connection):
     
     return rows
 
+def get_table_contents_machineID(table_name, connection):
+    cursor = connection.cursor()
+ 
+    query = "SELECT DISTINCT MachineID FROM {}".format(table_name)
+    
+    cursor.execute(query)
+    
+    rows = cursor.fetchall()
+    # it seems liken when fetchall(), csv entries atre grouped when imported;
+    cursor.close()
+    
+    return rows
+
 def deleteStudent(UCINetID,connection):
     delete = "DELETE FROM Students WHERE UCINetID = '{}'".format(UCINetID)
     cursor = connection.cursor()
@@ -212,10 +225,8 @@ def emails_of_admin(machineID,connection):
 
     cursor = connection.cursor()
 
-
     cursor.execute(query)
     rows = cursor.fetchall()
-
 
     for row in rows:
         email_list = row[4].replace(';,', ';')
@@ -595,8 +606,15 @@ if __name__ == "__main__":
         max_course(args[2], connection)
     
     elif args[1] == "adminEmails":
-        emails_of_admin(args[2],connection)
+        emails_of_admin(args[2], connection)
 
+    elif args[1] == "adminEmails_in_batch":
+        rows = get_table_contents_machineID(args[2], connection)
+        for row in rows:
+            print(row[0])
+            emails_of_admin(row[0], connection)
+            print()  # This adds a newline after printing each row
+    # Hu: created for visualization
 
     elif args[1] == "activeStudent":
         active_Student(args[2], args[3], args[4], args[5], connection)

@@ -115,6 +115,8 @@ def drop_table(connection):
 ```
 
 
+
+
 ***
 # all tables
 Users (UCINetID, Firstname, Middlename, Lastname)
@@ -126,6 +128,73 @@ Projects (ProjectID, Name, Description, CourseID)
 Machines (MachineID, Hostname, IPAddress, OperationalStatus, Location)
 StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate)
 AdministratorManageMachines (AdministratorUCINetID, MachineID)
+
+
+
+***
+# funct 10
+AdministratorManageMachines (AdministratorUCINetID, MachineID)
+Administrators (UCINetID)
+Users (UCINetID, Firstname, Middlename, Lastname)
+UserEmail (UCINetID, Email)
+// uhh. I think a JOIN OF all these tables.
+// output 'Table - UCINETId,first name,middle name,last name,list of email'
+// ouputting 'UCINETId,first name,middle name,last name' easy. but list of email
+// python3 project.py adminEmails [machineId: int]
+// AdministratorManageMachines -> Adminstrators -> Users -> UserEmail
+// think it's gonna be like a two part query. where funct call 1 return UCINETId,first name,middle name,last name. then function call 2 return list of email.
+
+python3 project.py getTableContent AdministratorManageMachines
+
+emails_of_admin(args[2],connection)
+args[2] == adminEmails
+
+    elif args[1] == "adminEmails_in_batch":
+        rows = get_table_contents(args[2], connection)
+        for row in rows:
+            emails_of_admin(row[0],connection)
+            print()  # This adds a newline after printing each row
+    # Hu: created for visualization
+
+python3 project.py adminEmails_in_batch AdministratorManageMachines
+
+
+
+***
+# funct 10
+python3 project.py getTableContent AdministratorManageMachines
+python3 project.py adminEmails_in_batch AdministratorManageMachines
+
+
+
+***
+# funct 10
+def emails_of_admin(machineID,connection):
+    # AdministratorManageMachines -> Adminstrators -> Users -> UserEmail
+
+    query = """
+        SELECT A.UCINetID, U.Firstname, U.Middlename, U.Lastname, GROUP_CONCAT(UE.Email, ';') AS EmailList
+        FROM Administrators A
+        INNER JOIN Users U ON A.UCINetID = U.UCINetID
+        INNER JOIN UserEmail UE ON A.UCINetID = UE.UCINetID
+        INNER JOIN AdministratorManageMachines AMM ON A.UCINetID = AMM.AdministratorUCINetID
+        WHERE AMM.MachineID = {}
+        GROUP BY A.UCINetID, U.Firstname, U.Middlename, U.Lastname
+        ORDER BY A.UCINetID ASC;
+    """.format(machineID)
+    # `GROUP BY A.UCINetID, U.Firstname, U.Middlename, U.Lastname`, allow you to use aggregate funct such as `GROUP_CONCAT(`
+    cursor = connection.cursor()
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    for row in rows:
+        email_list = row[4].replace(';,', ';')
+        # `replace(';,', ';')` is this in respons to group concate??? possibly;
+        if email_list.endswith(';'):
+            email_list = email_list[:-1]  # Remove the last semicolon
+        print(','.join(str(cell) for cell in row[:4]) + ',' + email_list)
+        # `.join(` join each entry within a row
 
 
 

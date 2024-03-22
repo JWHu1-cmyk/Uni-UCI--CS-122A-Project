@@ -30,8 +30,8 @@ python3 -c "print()"
 # Hu: run 'python3 project.py getTableContent Students' to verify
 # Hu: run 'python3 project.py getTableContent Users' to verify
 
-python3 project.py deleteStudent_in_batch Students
-python3 -c "print()"
+# python3 project.py deleteStudent_in_batch Students
+# python3 -c "print()"
 
 # Hu: run 'python3 project.py getTableContent Students' to verify
 # Hu: run 'python3 project.py getTableContent Users' to verify
@@ -93,3 +93,9 @@ python3 -c "print()"
 
 python3 project.py getTableContent Machines
 python3 -c "print()"
+
+python3 project.py adminEmails 102
+# Hu: funct 10, should return nothing as 102 is not a MachineID;
+python3 project.py adminEmails_in_batch AdministratorManageMachines
+# Hu: funct 10
+# Hu: verify with 'python3 project.py getTableContent AdministratorManageMachines'
