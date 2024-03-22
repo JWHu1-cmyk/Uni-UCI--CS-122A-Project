@@ -99,3 +99,19 @@ python3 project.py adminEmails 102
 python3 project.py adminEmails_in_batch AdministratorManageMachines
 # Hu: funct 10
 # Hu: verify with 'python3 project.py getTableContent AdministratorManageMachines'
+
+
+
+python3 project.py getTableContentFunct11 StudentUseMachinesInProject
+# Hu: funct 11
+# generate custome query base on the output
+# StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate)
+# python3 project.py activeStudent [machineId: int] [N:int] [start:date] [end:date]
+python3 project.py activeStudent 1 2 2020-01-01 2020-12-01
+python3 project.py activeStudent 2 2 2020-01-01 2020-12-01
+python3 project.py activeStudent 3 2 2020-01-01 2020-12-01
+python3 project.py activeStudent 4 2 2020-01-01 2020-12-01
+python3 project.py activeStudent 6 2 2020-01-01 2020-12-01
+python3 project.py activeStudent 6 1 2020-06-01 2020-06-20
+python3 project.py activeStudent 6 1 2020-07-01 2020-07-20
+# Hu: difficult to systemize the tests.

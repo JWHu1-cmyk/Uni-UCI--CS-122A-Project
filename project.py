@@ -154,6 +154,19 @@ def get_table_contents_machineID(table_name, connection):
     
     return rows
 
+def get_table_contents_funct_11(table_name, connection):
+    cursor = connection.cursor()
+ 
+    query = "SELECT * FROM {} ORDER BY MachineID, StudentUCINetID".format(table_name)
+    
+    cursor.execute(query)
+    
+    rows = cursor.fetchall()
+    # it seems liken when fetchall(), csv entries atre grouped when imported;
+    cursor.close()
+    
+    return rows
+
 def deleteStudent(UCINetID,connection):
     delete = "DELETE FROM Students WHERE UCINetID = '{}'".format(UCINetID)
     cursor = connection.cursor()
@@ -514,6 +527,13 @@ if __name__ == "__main__":
     
     elif args[1] == "getTableContent":
         rows = get_table_contents(args[2], connection)
+        for row in rows:
+            print(row)
+            print()  # This adds a newline after printing each row
+    # Hu: created for visualization
+    
+    elif args[1] == "getTableContentFunct11":
+        rows = get_table_contents_funct_11(args[2], connection)
         for row in rows:
             print(row)
             print()  # This adds a newline after printing each row

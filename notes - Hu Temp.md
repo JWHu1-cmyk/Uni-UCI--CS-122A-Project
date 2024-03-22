@@ -1,5 +1,58 @@
 
 
+
+***
+# funct 11
+    elif args[1] == "activeStudent":
+        active_Student(args[2], args[3], args[4], args[5], connection)
+
+***
+# funct 11
+def active_Student(mid, N, startDate, endDate, connection):
+    query = """
+    SELECT U.UCINetID, U.Firstname, U.Middlename, U.Lastname
+    FROM Users U, Students S, StudentUseMachinesInProject P
+    WHERE U.UCINetID = S.UCINetID AND S.UCINetID = P.StudentUCINetID AND P.MachineID = '{}' 
+    AND P.StartDate >= '{}' AND P.EndDate <= '{}'
+    GROUP BY U.UCINetID
+    # without this can't use HAVING COUNT(*) >= {}
+    HAVING COUNT(*) >= {}
+    ORDER BY U.UCINetID ASC
+    """.format(mid, startDate, endDate, N)
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row[0],",", row[1],",", row[2], ",", row[3], sep="")
+
+    cursor.close()
+
+
+
+
+    # def import_data(folderName:str, connection):
+
+    def add_use(ProjectID,StudentUCINetID,MachineID,StartDate,EndDate,connection):
+        use_query = "INSERT INTO StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate) VALUES (%s, %s, %s, %s, %s)"
+        cursor = connection.cursor()
+
+        cursor.execute(use_query, (ProjectID, StudentUCINetID, MachineID, StartDate, EndDate))
+
+        # Committing the changes
+        connection.commit()
+        cursor.close()
+
+    # is time range data type inserted when I use add_use() 
+    add_use(row[0],row[1],row[2],row[3],row[4],connection)
+    1,mchang13,1,2020-01-04,2020-01-05
+    # chatgpt:: with 1, mchang13, 1, 2020-01-04, 2020-01-05 as the input values, the function will insert these values into your database as long as the StartDate and EndDate columns are of a date-compatible type (such as DATE in SQL).
+
+
+
+
 ***
 The error message you're encountering, Fail: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails, indicates that your attempt to delete or update a row in the parent table (students) is being blocked because there are dependent rows in the child table (studentusemachinesinproject) that reference the row you're trying to delete. This behavior is due to a foreign key constraint that enforces referential integrity between the two tables.
 
