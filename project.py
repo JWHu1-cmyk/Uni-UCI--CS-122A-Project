@@ -504,6 +504,24 @@ def import_data(folderName:str, connection):
             # Process each row
             add_mange(row[0],row[1],connection)
 
+def courses_machines_distinct_use(connection):
+    query = """
+    SELECT DISTINCT C.CourseID, P.ProjectID, SM.StudentUCINetID, SM.MachineID
+    FROM Courses C
+    JOIN Projects P ON C.CourseID = P.CourseID
+    JOIN StudentUseMachinesInProject SM ON P.ProjectID = SM.ProjectID;
+    """ 
+
+    cursor = connection.cursor()
+
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row)
+
+    cursor.close()
 
 
 
@@ -562,8 +580,8 @@ if __name__ == "__main__":
             print("Success")
         # except:
         #     print("Fail")
-        except Exception as e:
-            print(f"Fail: {str(e)}")
+        except:
+            print("Fail")  
     
     elif args[1] ==  "deleteStudent_in_batch":
         rows = get_table_contents(args[2], connection)
@@ -572,9 +590,11 @@ if __name__ == "__main__":
                 deleteUser(row[0],connection)
                 deleteStudent(row[0],connection)
                 print("delete " + row[0] + " Success\n")
-            except Exception as e:
-                print("delete " + row[0] + " Fail")
-                print(f"Fail: {str(e)}\n")
+            # except Exception as e:
+            #     print("delete " + row[0] + " Fail")
+            #     print(f"Fail: {str(e)}\n")
+            except:
+                print("Fail")  
             
     elif args[1] =="insertMachine":
         try:
@@ -589,8 +609,8 @@ if __name__ == "__main__":
             print("Success")
         # except:
         #     print("Fail")
-        except Exception as e:
-            print(f"Fail: {str(e)}")
+        except:
+            print("Fail")  
                 
     elif args[1] == "updateCourse":
         try:
@@ -605,9 +625,11 @@ if __name__ == "__main__":
             try:
                 update_Course(row[0], args[3], connection)
                 print("update " + str(row[0]) + " Success")
-            except Exception as e:
-                print("update " + str(row[0]) + " Fail")
-                print(f"Fail: {str(e)}")
+            # except Exception as e:
+            #     print("update " + str(row[0]) + " Fail")
+            #     print(f"Fail: {str(e)}")
+            except:
+                print("Fail")  
 
     elif args[1] == "listCourse":
         courses_attended(args[2], connection)
@@ -618,9 +640,11 @@ if __name__ == "__main__":
             try:
                 print("\nlistCourse_in_batch " + row[1] + " Success")
                 courses_attended(row[1], connection)
-            except Exception as e:
-                print("listCourse " + row[1] + " Fail")
-                print(f"Fail: {str(e)}")
+            # except Exception as e:
+            #     print("listCourse " + row[1] + " Fail")
+            #     print(f"Fail: {str(e)}")
+            except:
+                print("Fail") 
             
     elif args[1] == "popularCourse":
         max_course(args[2], connection)
@@ -641,5 +665,7 @@ if __name__ == "__main__":
 
     elif args[1] == "machineUsage":
         machine_Usage(args[2], connection)
-        
+    
+    elif args[1] == "coursesMachinesDistinctUse":
+         courses_machines_distinct_use(connection)
  

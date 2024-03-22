@@ -115,3 +115,23 @@ python3 project.py activeStudent 6 2 2020-01-01 2020-12-01
 python3 project.py activeStudent 6 1 2020-06-01 2020-06-20
 python3 project.py activeStudent 6 1 2020-07-01 2020-07-20
 # Hu: difficult to systemize the tests.
+
+
+
+python3 project.py coursesMachinesDistinctUse
+# Hu: funct 12
+# DISTINCT C.CourseID, P.ProjectID, SM.StudentUCINetID, SM.MachineID
+# python3 project.py machineUsage [courseId: int]
+
+python3 -c "print()"
+
+python3 project.py machineUsage 1
+python3 -c "print()"
+python3 project.py machineUsage 2
+python3 -c "print()"
+python3 project.py machineUsage 3
+python3 -c "print()"
+python3 project.py machineUsage 4
+python3 -c "print()"
+python3 project.py machineUsage 5
+python3 -c "print()"

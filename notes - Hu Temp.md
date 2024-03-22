@@ -2,6 +2,117 @@
 
 
 ***
+# funct 12
+
+Output:
+Table - machineID,hostname,ipAddr,count
+
+python3 project.py machineUsage [courseId: int]
+
+Courses (CourseID, Title, Quarter)
+Projects (ProjectID, Name, Description, CourseID)
+# MachineUse
+StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate)
+Machines (MachineID, Hostname, IPAddress, OperationalStatus, Location)
+
+
+# python3 project.py getTableContent Projects
+# python3 project.py getTableContent StudentUseMachinesInProject
+# python3 project.py getTableContent Machines
+# MachineID 102, exist, but no student use it. thus not in StudentUseMachinesInProject record
+
+
+    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID) ON DELETE NO ACTION, FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE NO ACTION );"
+    connect = connection.cursor()
+    connect.execute(create_table_query)
+    connection.commit()
+
+
+
+
+SELECT DISTINCT C.CourseID, P.ProjectID, SM.StudentUCINetID, SM.MachineID
+FROM Courses C, Projects P, StudentUseMachinesInProject SM,
+WHERE C.CourseID = P.CourseID AND P.ProjectID = SM.ProjectID
+
+
+
+
+def courses_machines_distinct_use(connection):
+    query = """
+    SELECT DISTINCT C.CourseID, P.ProjectID, SM.StudentUCINetID, SM.MachineID
+    FROM Courses C
+    JOIN Projects P ON C.CourseID = P.CourseID
+    JOIN StudentUseMachinesInProject SM ON P.ProjectID = SM.ProjectID;
+    """ 
+
+    cursor = connection.cursor()
+
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row)
+
+    cursor.close()
+
+
+
+python3 project.py coursesMachinesDistinctUse
+# DISTINCT C.CourseID, P.ProjectID, SM.StudentUCINetID, SM.MachineID
+# python3 project.py machineUsage [courseId: int]
+python3 project.py machineUsage 1
+python3 project.py machineUsage 2
+python3 project.py machineUsage 3
+python3 project.py machineUsage 4
+python3 project.py machineUsage 5
+
+
+
+
+
+
+***
+# funct 11
+python3 project.py getTableContent StudentUseMachinesInProject
+
+
+***
+# all tables
+Users (UCINetID, Firstname, Middlename, Lastname)
+UserEmail (UCINetID, Email)
+Students (UCINetID)
+Administrators (UCINetID)
+Courses (CourseID, Title, Quarter)
+Projects (ProjectID, Name, Description, CourseID)
+Machines (MachineID, Hostname, IPAddress, OperationalStatus, Location)
+StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate)
+AdministratorManageMachines (AdministratorUCINetID, MachineID)
+
+
+Users (UCINetID, Firstname, Middlename, Lastname)
+Students (UCINetID)
+StudentUseMachinesInProject (ProjectID ,StudentUCINetID ,MachineID ,StartDate ,EndDate)
+
+MachineID
+
+python3 project.py getTableContentFunct11 StudentUseMachinesInProject
+
+
+
+
+Selection of Non-Aggregated Columns: SQL standards (and most SQL database systems) require that any column in the SELECT list that is not part of an aggregate function (like SUM(), AVG(), COUNT(), etc.) must be included in the GROUP BY clause. Your query selects * (all columns), but only groups by StudentUCINetID and MachineID. This could lead to an error in many SQL databases because it's not clear how to handle the columns that are not part of the GROUP BY clause.
+
+Intent of Grouping: If your intention is to simply order the results by StudentUCINetID and MachineID without aggregating data, you should use ORDER BY instead of GROUP BY. If you indeed intend to perform some form of aggregation (like counting records, summing values, etc.), you'll need to specify what you want to aggregate and how.
+
+
+
+
+
+
+
+
+***
 # funct 11
     elif args[1] == "activeStudent":
         active_Student(args[2], args[3], args[4], args[5], connection)
