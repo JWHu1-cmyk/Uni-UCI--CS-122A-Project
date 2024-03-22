@@ -378,12 +378,12 @@ def create_tables(connection):
     connection.commit()
     #add managae and use rel tables
 
-    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) );"
+    create_table_query =" CREATE TABLE StudentUseMachinesInProject( ProjectID INT,StudentUCINetID VARCHAR(20), MachineID INT, StartDate DATE, EndDate DATE, PRIMARY KEY (ProjectID, StudentUCINetID, MachineID), FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID), FOREIGN KEY (StudentUCINetID) REFERENCES Students(UCINetID) ON DELETE NO ACTION, FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE NO ACTION );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
 
-    create_table_query = "CREATE TABLE AdministratorManageMachines( AdministratorUCINetID VARCHAR(20), MachineID INT, PRIMARY KEY (AdministratorUCINetID, MachineID), FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID), FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) );"
+    create_table_query = "CREATE TABLE AdministratorManageMachines( AdministratorUCINetID VARCHAR(20), MachineID INT, PRIMARY KEY (AdministratorUCINetID, MachineID), FOREIGN KEY (AdministratorUCINetID) REFERENCES Administrators(UCINetID) ON DELETE NO ACTION, FOREIGN KEY (MachineID) REFERENCES Machines(MachineID) ON DELETE NO ACTION );"
     connect = connection.cursor()
     connect.execute(create_table_query)
     connection.commit()
