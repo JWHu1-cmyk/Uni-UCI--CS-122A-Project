@@ -1,3 +1,5 @@
+
+***
 ● Developed a command-line interface (CLI) program using Python and MySQL to manage server data in a university environment.
 
 ● Integrated MySQL databases with Python, executing SQL queries for data insertion, updates, deletions, and queries.
@@ -10,5 +12,6 @@
 
 ● Collaborated on database schema design using ER diagrams and DDL scripts to structure tables and relationships.
 
+***
 to run, type:
 `chmod +x myscript.sh && ./myscript.sh`
