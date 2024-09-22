@@ -4,3 +4,6 @@
 ● Implemented complex queries to list popular courses, generate usage reports, and retrieve active student records.
 ● Ensured reliability by handling edge cases like duplicate records and providing user-friendly outputs.
 ● Collaborated on database schema design using ER diagrams and DDL scripts to structure tables and relationships.
+
+to run, type:
+`chmod +x myscript.sh && ./myscript.sh`
