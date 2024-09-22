@@ -1,5 +1,4 @@
 
-***
 # Main:
 
 ● Developed a command-line interface (CLI) program using Python and MySQL to manage server data in a university environment.
@@ -14,7 +13,6 @@
 
 ● Collaborated on database schema design using ER diagrams and DDL scripts to structure tables and relationships.
 
-***
 # Guide:
 
 to run, type:
